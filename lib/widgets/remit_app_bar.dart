@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import '../app_theme.dart';
+import '../screens/onboarding_screen.dart';
 
 class RemitAppBar extends StatelessWidget implements PreferredSizeWidget {
   const RemitAppBar({
@@ -31,8 +32,9 @@ class RemitAppBar extends StatelessWidget implements PreferredSizeWidget {
         final isCompact = constraints.maxWidth < 720;
 
         return AppBar(
-          automaticallyImplyLeading: isCompact,
+          automaticallyImplyLeading: true,
           titleSpacing: isCompact ? 0 : 24,
+          iconTheme: const IconThemeData(color: AppColors.textPrimary),
           title: Row(
             children: [
               _buildLogo(),
@@ -41,40 +43,65 @@ class RemitAppBar extends StatelessWidget implements PreferredSizeWidget {
             ],
           ),
           flexibleSpace: Container(
-            decoration: const BoxDecoration(gradient: Gradients.hero),
+            decoration: const BoxDecoration(
+              color: AppColors.cardBackground,
+            ),
           ),
           actions: [
-            if (isCompact)
-              _CompactMenu(currentRoute: currentRoute, onNavigate: onNavigate),
             if (!isCompact && showAuthActions) ...[
-              TextButton(
-                onPressed: () => onNavigate('/login'),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: Gradients.button,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ElevatedButton(
-                  onPressed: () => onNavigate('/signup'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 12,
-                    ),
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                  ),
-                  child: const Text('Join Now'),
-                ),
+              Builder(
+                builder: (context) {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    // User is logged in, show logout button
+                    return TextButton.icon(
+                      onPressed: () => _handleLogout(context),
+                      icon: const Icon(Icons.logout, color: Colors.white, size: 18),
+                      label: const Text(
+                        'Logout',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  } else {
+                    // User is not logged in, show login/signup buttons
+                    return Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => onNavigate('/login'),
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: Gradients.button,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () => onNavigate('/signup'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 12,
+                              ),
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                            ),
+                            child: const Text('Join Now'),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
               const SizedBox(width: 16),
             ],
@@ -101,7 +128,7 @@ class RemitAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         const SizedBox(width: 12),
         const Text(
-          'RemitHub',
+          'weweremit',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w700,
@@ -126,6 +153,20 @@ class RemitAppBar extends StatelessWidget implements PreferredSizeWidget {
         )
         .toList();
   }
+
+  static Future<void> _handleLogout(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      debugPrint('Logout error: $e');
+    }
+  }
 }
 
 class _NavigationButton extends StatelessWidget {
@@ -146,16 +187,16 @@ class _NavigationButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: isActive
+            decoration: isActive
             ? BoxDecoration(
-                color: Colors.white.withOpacity(0.16),
+                color: AppColors.primaryBlue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               )
             : null,
         child: Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(isActive ? 1 : 0.78),
+            color: AppColors.textPrimary.withOpacity(isActive ? 1 : 0.7),
             fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
@@ -164,42 +205,3 @@ class _NavigationButton extends StatelessWidget {
   }
 }
 
-class _CompactMenu extends StatelessWidget {
-  const _CompactMenu({required this.currentRoute, required this.onNavigate});
-
-  final String currentRoute;
-  final void Function(String route) onNavigate;
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.menu, color: Colors.white),
-      onSelected: onNavigate,
-      itemBuilder: (context) {
-        return [
-          ...RemitAppBar._routes.entries.map(
-            (route) => PopupMenuItem<String>(
-              value: route.key,
-              child: Row(
-                children: [
-                  if (route.key == currentRoute)
-                    const Icon(Icons.check, size: 16)
-                  else
-                    const SizedBox(width: 16),
-                  const SizedBox(width: 8),
-                  Text(route.value),
-                ],
-              ),
-            ),
-          ),
-          const PopupMenuDivider(),
-          PopupMenuItem<String>(value: '/login', child: const Text('Login')),
-          PopupMenuItem<String>(
-            value: '/signup',
-            child: const Text('Join Now'),
-          ),
-        ];
-      },
-    );
-  }
-}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "404706246506",
+    "project_id": "remithub-7ed26",
+    "storage_bucket": "remithub-7ed26.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404706246506:android:1361eb6f3dd0c665252f13",
+        "android_client_info": {
+          "package_name": "com.example.weweremit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBecjOZeWZSnJRBN-iY7DYufCQ6ZSnDxfs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -35,6 +35,29 @@ class Gradients {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
+
+  static const LinearGradient onboardingBackground = LinearGradient(
+    colors: [
+      Color(0xFF1A1A2E), // Dark purple-blue
+      Color(0xFF16213E), // Darker blue
+      Color(0xFF0F3460), // Dark blue
+      AppColors.royalBlue,
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  static const LinearGradient authBackground = LinearGradient(
+    colors: [
+      Colors.white,
+      Color(0xFFF0F7FF), // Very light blue
+      AppColors.oceanTeal,
+      AppColors.primaryBlue,
+      AppColors.blushPurple,
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
 }
 
 class AppTheme {
@@ -67,7 +90,7 @@ class AppTheme {
         titleTextStyle: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: AppColors.cardBackground,
+          color: AppColors.textPrimary,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
